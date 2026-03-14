@@ -1,0 +1,14 @@
+# wrangler.toml — Cloudflare Pages configuration
+name = "common-read"
+compatibility_date = "2024-05-01"
+pages_build_output_dir = "dist"
+
+# After running `npm run db:create`, paste your database_id below
+[[d1_databases]]
+binding = "DB"
+database_name = "common-read-db"
+database_id = "c23a9b98-f4d1-4365-8dbb-8fbb3d52b1fa"
+
+# Environment variables (set via Cloudflare dashboard or wrangler secret)
+# BIBLE_API_KEY = "your-api-bible-key"
+# JWT_SECRET = "your-random-secret-string"
