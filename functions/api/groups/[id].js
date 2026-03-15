@@ -1,11 +1,24 @@
 import { getUser, json, unauthorized } from '../../lib/auth.js';
 
+function getCurrentChapter(startDate, totalChapters, todayStr) {
+  // Parse both as plain date strings to avoid timezone issues
+  const start = new Date(startDate + 'T12:00:00Z');
+  const today = todayStr
+    ? new Date(todayStr + 'T12:00:00Z')
+    : new Date();
+
+  const daysSinceStart = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+  return Math.min(Math.max(daysSinceStart + 1, 1), totalChapters);
+}
+
 // GET /api/groups/:id — get group details + members + today's info
 export async function onRequestGet({ params, request, env }) {
   const user = await getUser(request, env);
   if (!user) return unauthorized();
 
   const groupId = params.id;
+  const url = new URL(request.url);
+  const todayStr = url.searchParams.get('today'); // e.g. "2026-03-13"
 
   // Verify membership
   const membership = await env.DB.prepare(
@@ -26,13 +39,8 @@ export async function onRequestGet({ params, request, env }) {
     WHERE gm.group_id = ?
   `).bind(groupId).all();
 
-  // Calculate today's chapter
-  const start = new Date(group.start_date + 'T00:00:00Z');
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const daysSinceStart = Math.floor((today - start) / (1000 * 60 * 60 * 24));
-  const currentChapter = Math.min(Math.max(daysSinceStart + 1, 1), group.total_chapters);
-  const planComplete = currentChapter >= group.total_chapters && daysSinceStart >= group.total_chapters;
+  const currentChapter = getCurrentChapter(group.start_date, group.total_chapters, todayStr);
+  const planComplete = currentChapter >= group.total_chapters;
 
   return json({
     group: {
