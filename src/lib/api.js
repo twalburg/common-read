@@ -91,6 +91,17 @@ export const reflections = {
     }),
 };
 
+// Reactions
+export const reactions = {
+  getForReflections: (reflectionIds) =>
+    request(`/reactions?reflectionIds=${reflectionIds.join(',')}`),
+  toggle: (reflectionId, emoji) =>
+    request('/reactions', {
+      method: 'POST',
+      body: JSON.stringify({ reflectionId, emoji }),
+    }),
+};
+
 // Bible
 export const bible = {
   getChapter: (bookId, chapter) =>
