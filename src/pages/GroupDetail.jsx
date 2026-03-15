@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { groups, bible, reflections } from '../lib/api.js';
 import { useAuth } from '../App.jsx';
 import { getReflectionQuestion, getCenteringPrompt } from '../lib/prompts.js';
+import { BIBLE_BOOKS } from '../lib/books.js';
 
 export default function GroupDetail() {
   const { groupId } = useParams();
@@ -12,6 +13,7 @@ export default function GroupDetail() {
   const [group, setGroup] = useState(null);
   const [members, setMembers] = useState([]);
   const [currentChapter, setCurrentChapter] = useState(1);
+  const [planComplete, setPlanComplete] = useState(false);
   const [viewingChapter, setViewingChapter] = useState(null);
   const [scripture, setScripture] = useState(null);
   const [chapterReflections, setChapterReflections] = useState([]);
@@ -31,6 +33,11 @@ export default function GroupDetail() {
   const [journal, setJournal] = useState(null);
   const [journalLoading, setJournalLoading] = useState(false);
 
+  // Celebration
+  const [celebration, setCelebration] = useState(null);
+  const [celebrationLoading, setCelebrationLoading] = useState(false);
+  const [showNextBook, setShowNextBook] = useState(false);
+
   // Load group data
   useEffect(() => {
     async function load() {
@@ -39,7 +46,11 @@ export default function GroupDetail() {
         setGroup(data.group);
         setMembers(data.members);
         setCurrentChapter(data.currentChapter);
+        setPlanComplete(data.planComplete);
         setViewingChapter(data.currentChapter);
+        if (data.planComplete) {
+          setTab('celebrate');
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -48,6 +59,24 @@ export default function GroupDetail() {
     }
     load();
   }, [groupId]);
+
+  // Load celebration data
+  useEffect(() => {
+    if (tab !== 'celebrate' || !group || !planComplete) return;
+    if (celebration) return; // already loaded
+    setCelebrationLoading(true);
+    async function loadCelebration() {
+      try {
+        const data = await groups.celebration(groupId);
+        setCelebration(data);
+      } catch (err) {
+        console.error('Failed to load celebration:', err);
+      } finally {
+        setCelebrationLoading(false);
+      }
+    }
+    loadCelebration();
+  }, [tab, group, planComplete, groupId, celebration]);
 
   // Load scripture when viewing chapter changes
   useEffect(() => {
@@ -150,6 +179,7 @@ export default function GroupDetail() {
   const centeringPrompt = getCenteringPrompt(viewingChapter);
   const reflectionQuestion = getReflectionQuestion(viewingChapter);
   const todayCompleted = chapterReflections.length;
+  const isCreator = group.createdBy === user.id;
 
   return (
     <div>
@@ -160,47 +190,59 @@ export default function GroupDetail() {
       {/* Group title + chapter nav */}
       <div className="mb-16">
         <h2 style={{ margin: 0 }}>{group.name}</h2>
-        <div className="text-small text-muted">{group.bookLabel} · Chapter a day</div>
+        <div className="text-small text-muted">
+          {group.bookLabel} · {planComplete ? 'Completed' : 'Chapter a day'}
+        </div>
       </div>
 
-      <div className="chapter-nav">
-        <button
-          className="btn btn-secondary btn-small"
-          onClick={() => setViewingChapter(Math.max(1, viewingChapter - 1))}
-          disabled={viewingChapter <= 1}
-        >
-          ← Prev
-        </button>
-        <div className="chapter-label">
-          {group.bookLabel} {viewingChapter}
-          {isToday && <span className="text-small text-muted" style={{ marginLeft: 8 }}>Today</span>}
-        </div>
-        <button
-          className="btn btn-secondary btn-small"
-          onClick={() => setViewingChapter(Math.min(group.totalChapters, viewingChapter + 1))}
-          disabled={viewingChapter >= currentChapter}
-        >
-          Next →
-        </button>
-      </div>
+      {/* Chapter nav — hide on celebrate tab */}
+      {tab !== 'celebrate' && (
+        <>
+          <div className="chapter-nav">
+            <button
+              className="btn btn-secondary btn-small"
+              onClick={() => setViewingChapter(Math.max(1, viewingChapter - 1))}
+              disabled={viewingChapter <= 1}
+            >
+              ← Prev
+            </button>
+            <div className="chapter-label">
+              {group.bookLabel} {viewingChapter}
+              {isToday && !planComplete && <span className="text-small text-muted" style={{ marginLeft: 8 }}>Today</span>}
+            </div>
+            <button
+              className="btn btn-secondary btn-small"
+              onClick={() => setViewingChapter(Math.min(group.totalChapters, viewingChapter + 1))}
+              disabled={viewingChapter >= group.totalChapters}
+            >
+              Next →
+            </button>
+          </div>
 
-      {/* Today's completion indicator */}
-      {isToday && members.length > 0 && (
-        <div className="completion-bar mb-16">
-          <div className="completion-text">
-            {todayCompleted} of {members.length} reflected today
-          </div>
-          <div className="completion-track">
-            <div
-              className="completion-fill"
-              style={{ width: `${(todayCompleted / members.length) * 100}%` }}
-            />
-          </div>
-        </div>
+          {/* Today's completion indicator */}
+          {isToday && !planComplete && members.length > 0 && (
+            <div className="completion-bar mb-16">
+              <div className="completion-text">
+                {todayCompleted} of {members.length} reflected today
+              </div>
+              <div className="completion-track">
+                <div
+                  className="completion-fill"
+                  style={{ width: `${(todayCompleted / members.length) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Tabs */}
       <div className="tabs">
+        {planComplete && (
+          <button className={`tab ${tab === 'celebrate' ? 'active' : ''}`} onClick={() => setTab('celebrate')}>
+            Complete
+          </button>
+        )}
         <button className={`tab ${tab === 'read' ? 'active' : ''}`} onClick={() => setTab('read')}>
           Read
         </button>
@@ -215,11 +257,115 @@ export default function GroupDetail() {
         </button>
       </div>
 
+      {/* ==================== CELEBRATE TAB ==================== */}
+      {tab === 'celebrate' && (
+        <div>
+          {celebrationLoading ? (
+            <div className="loading">Loading celebration...</div>
+          ) : celebration ? (
+            <>
+              {/* Hero celebration card */}
+              <div className="celebration-hero">
+                <div className="celebration-emoji">🎉</div>
+                <h2 className="celebration-title">You finished {celebration.bookLabel}!</h2>
+                <p className="celebration-subtitle">
+                  {celebration.memberCount} {celebration.memberCount === 1 ? 'reader' : 'readers'} · {celebration.totalChapters} chapters · {formatDate(celebration.startDate)} – {formatDate(celebration.endDate)}
+                </p>
+              </div>
+
+              {/* Group stats */}
+              <div className="card">
+                <div className="celebration-stats">
+                  <div className="celebration-stat">
+                    <div className="celebration-stat-value">{celebration.totalReflections}</div>
+                    <div className="celebration-stat-label">Reflections shared</div>
+                  </div>
+                  <div className="celebration-stat">
+                    <div className="celebration-stat-value">{celebration.totalWords.toLocaleString()}</div>
+                    <div className="celebration-stat-label">Words written</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Highlights */}
+              {(celebration.mvp || celebration.streakChamp) && (
+                <div className="card">
+                  <h3 style={{ marginBottom: 16 }}>Highlights</h3>
+                  {celebration.mvp && (
+                    <div className="celebration-highlight">
+                      <span className="celebration-highlight-icon">✍️</span>
+                      <div>
+                        <div className="celebration-highlight-title">Most Reflections</div>
+                        <div className="celebration-highlight-detail">
+                          {celebration.mvp.displayName} — {celebration.mvp.totalReflections} reflections
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {celebration.streakChamp && celebration.streakChamp.longestStreak > 1 && (
+                    <div className="celebration-highlight">
+                      <span className="celebration-highlight-icon">🔥</span>
+                      <div>
+                        <div className="celebration-highlight-title">Longest Streak</div>
+                        <div className="celebration-highlight-detail">
+                          {celebration.streakChamp.displayName} — {celebration.streakChamp.longestStreak} days
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Member breakdown */}
+              <div className="card">
+                <h3 style={{ marginBottom: 16 }}>Everyone's Journey</h3>
+                {celebration.members.map(m => (
+                  <div key={m.userId} className="stat-member">
+                    <div className="stat-member-name">{m.displayName}</div>
+                    <div className="stat-details">
+                      <span className="stat-streak">
+                        {m.chaptersCompleted} of {celebration.totalChapters} chapters
+                      </span>
+                      <span className="stat-total">
+                        {m.wordCount.toLocaleString()} words
+                      </span>
+                    </div>
+                    <div className="progress-track mt-4">
+                      <div
+                        className="progress-fill"
+                        style={{ width: `${(m.chaptersCompleted / celebration.totalChapters) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Next book CTA */}
+              <div className="card text-center">
+                <p style={{ marginBottom: 16, color: 'var(--color-text-soft)' }}>
+                  Your group's reflections are saved in the Journal tab. Ready for the next book?
+                </p>
+                {!showNextBook ? (
+                  <button className="btn btn-primary" onClick={() => setShowNextBook(true)}>
+                    Start Next Book
+                  </button>
+                ) : (
+                  <NextBookPicker
+                    groupId={groupId}
+                    onCreated={(newId) => navigate(`/group/${newId}`)}
+                    onCancel={() => setShowNextBook(false)}
+                  />
+                )}
+              </div>
+            </>
+          ) : null}
+        </div>
+      )}
+
       {/* ==================== READ TAB ==================== */}
       {tab === 'read' && (
         <div>
-          {/* Centering prompt — shown before reading */}
-          {!centeringDismissed && (
+          {!centeringDismissed && !planComplete && (
             <div className="centering-card">
               <div className="centering-label">Before you read</div>
               <h3 className="centering-title">{centeringPrompt.title}</h3>
@@ -236,8 +382,7 @@ export default function GroupDetail() {
             </div>
           )}
 
-          {/* Scripture */}
-          {centeringDismissed && (
+          {(centeringDismissed || planComplete) && (
             <div className="card">
               {scriptureLoading ? (
                 <div className="loading">Loading scripture...</div>
@@ -261,13 +406,11 @@ export default function GroupDetail() {
       {/* ==================== REFLECT TAB ==================== */}
       {tab === 'reflect' && (
         <div>
-          {/* Daily reflection question */}
           <div className="question-card">
             <div className="question-label">Today's Question</div>
             <p className="question-text">{reflectionQuestion}</p>
           </div>
 
-          {/* Your reflection */}
           <div className="card">
             <h3 style={{ marginBottom: 12 }}>Your Reflection</h3>
             <div className="form-group" style={{ margin: 0 }}>
@@ -290,7 +433,6 @@ export default function GroupDetail() {
             </div>
           </div>
 
-          {/* Others' reflections */}
           {otherReflections.length > 0 ? (
             <>
               <h3 className="mt-24 mb-16">From the Group</h3>
@@ -324,7 +466,7 @@ export default function GroupDetail() {
           ) : journal && journal.entries.length > 0 ? (
             <>
               <p className="text-small text-muted mb-24">
-                Scroll through your group's journey through {journal.bookLabel}.
+                {planComplete ? `Your group's journey through ${journal.bookLabel}.` : `Scroll through your group's journey through ${journal.bookLabel}.`}
               </p>
               {journal.entries.map(entry => (
                 <div key={entry.chapter} className="journal-entry">
@@ -362,11 +504,9 @@ export default function GroupDetail() {
       {/* ==================== COMMUNITY TAB ==================== */}
       {tab === 'community' && (
         <div>
-          {/* Streak / completion stats */}
           {stats ? (
             <div className="card mb-24">
               <h3 style={{ marginBottom: 16 }}>Reading Progress</h3>
-
               <div className="mb-16">
                 <div className="text-small text-muted" style={{ marginBottom: 4 }}>Group Progress</div>
                 <div>{stats.currentChapter} of {stats.totalChapters} chapters</div>
@@ -377,9 +517,7 @@ export default function GroupDetail() {
                   />
                 </div>
               </div>
-
               <hr className="divider" />
-
               <div className="stats-grid">
                 {stats.members.map(m => (
                   <div key={m.userId} className="stat-member">
@@ -409,10 +547,8 @@ export default function GroupDetail() {
             <div className="loading">Loading stats...</div>
           )}
 
-          {/* Group info */}
           <div className="card">
             <h3 style={{ marginBottom: 16 }}>Group Info</h3>
-
             <div className="mb-16">
               <div className="text-small text-muted" style={{ marginBottom: 4 }}>Reading Plan</div>
               <div>{group.bookLabel} — {group.totalChapters} chapters starting {
@@ -421,14 +557,11 @@ export default function GroupDetail() {
                 })
               }</div>
             </div>
-
             <div className="mb-16">
               <div className="text-small text-muted" style={{ marginBottom: 4 }}>Members ({members.length})</div>
               <div>{members.map(m => m.display_name).join(', ')}</div>
             </div>
-
             <hr className="divider" />
-
             <div className="text-small text-muted" style={{ marginBottom: 8 }}>Invite Code</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span className="invite-code" onClick={copyInviteCode}>{group.inviteCode}</span>
@@ -438,6 +571,77 @@ export default function GroupDetail() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// Helper
+function formatDate(dateStr) {
+  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric'
+  });
+}
+
+// Next Book Picker component
+function NextBookPicker({ groupId, onCreated, onCancel }) {
+  const [bookId, setBookId] = useState('JHN');
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1); // default to tomorrow
+    return d.toISOString().split('T')[0];
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const selectedBook = BIBLE_BOOKS.find(b => b.id === bookId);
+
+  async function handleStart(e) {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const data = await groups.startNextBook(groupId, {
+        book: bookId,
+        bookLabel: selectedBook.label,
+        totalChapters: selectedBook.chapters,
+        startDate,
+      });
+      onCreated(data.newGroupId);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div style={{ textAlign: 'left' }}>
+      <form onSubmit={handleStart}>
+        <div className="form-group">
+          <label>Next Book</label>
+          <select value={bookId} onChange={e => setBookId(e.target.value)}>
+            {BIBLE_BOOKS.map(b => (
+              <option key={b.id} value={b.id}>
+                {b.label} ({b.chapters} chapters)
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="form-group">
+          <label>Start Date</label>
+          <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
+        </div>
+        <div className="text-small text-muted mb-16">
+          {selectedBook.label} will take {selectedBook.chapters} days.
+        </div>
+        {error && <div className="error-msg mb-16">{error}</div>}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancel</button>
+          <button type="submit" className="btn btn-primary" disabled={loading} style={{ flex: 1 }}>
+            {loading ? 'Creating...' : `Start ${selectedBook.label}`}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

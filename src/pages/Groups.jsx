@@ -27,6 +27,9 @@ export default function Groups() {
   if (view === 'create') return <CreateGroup onBack={() => setView('list')} onCreated={() => { setView('list'); loadGroups(); }} />;
   if (view === 'join') return <JoinGroup onBack={() => setView('list')} onJoined={() => { setView('list'); loadGroups(); }} />;
 
+  const activeGroups = myGroups.filter(g => (g.status || 'active') === 'active');
+  const completedGroups = myGroups.filter(g => g.status === 'completed');
+
   return (
     <div>
       <div className="flex-between mb-24">
@@ -47,15 +50,36 @@ export default function Groups() {
           </p>
         </div>
       ) : (
-        myGroups.map(g => (
-          <div key={g.id} className="group-item" onClick={() => navigate(`/group/${g.id}`)}>
-            <div>
-              <div className="group-name">{g.name}</div>
-              <div className="group-book">{g.book_label}</div>
+        <>
+          {activeGroups.map(g => (
+            <div key={g.id} className="group-item" onClick={() => navigate(`/group/${g.id}`)}>
+              <div>
+                <div className="group-name">{g.name}</div>
+                <div className="group-book">{g.book_label}</div>
+              </div>
+              <div style={{ color: 'var(--color-text-muted)', fontSize: '1.2rem' }}>→</div>
             </div>
-            <div style={{ color: 'var(--color-text-muted)', fontSize: '1.2rem' }}>→</div>
-          </div>
-        ))
+          ))}
+
+          {completedGroups.length > 0 && (
+            <>
+              <div className="mt-24 mb-16" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <hr className="divider" style={{ flex: 1, margin: 0 }} />
+                <span className="text-small text-muted" style={{ whiteSpace: 'nowrap', fontWeight: 600 }}>Completed</span>
+                <hr className="divider" style={{ flex: 1, margin: 0 }} />
+              </div>
+              {completedGroups.map(g => (
+                <div key={g.id} className="group-item" style={{ opacity: 0.75 }} onClick={() => navigate(`/group/${g.id}`)}>
+                  <div>
+                    <div className="group-name">{g.name}</div>
+                    <div className="group-book">{g.book_label} ✓</div>
+                  </div>
+                  <div style={{ color: 'var(--color-text-muted)', fontSize: '1.2rem' }}>→</div>
+                </div>
+              ))}
+            </>
+          )}
+        </>
       )}
     </div>
   );

@@ -23,7 +23,6 @@ export function setStoredUser(user) {
   localStorage.setItem('cr_user', JSON.stringify(user));
 }
 
-// Get today's date as YYYY-MM-DD in the user's local timezone
 function getLocalToday() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -57,7 +56,7 @@ export const auth = {
     }),
 };
 
-// Groups — all group reads send local date for timezone-correct chapter calculation
+// Groups
 export const groups = {
   list: () => request('/groups'),
   get: (id) => request(`/groups/${id}?today=${getLocalToday()}`),
@@ -73,6 +72,12 @@ export const groups = {
     }),
   stats: (id) => request(`/groups/${id}/stats?today=${getLocalToday()}`),
   journal: (id) => request(`/groups/${id}/journal?today=${getLocalToday()}`),
+  celebration: (id) => request(`/groups/${id}/celebration`),
+  startNextBook: (id, data) =>
+    request(`/groups/${id}/next`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };
 
 // Reflections
