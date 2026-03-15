@@ -40,6 +40,66 @@
   --duration: 0.2s;
 }
 
+/* ==================== DARK THEME ==================== */
+[data-theme="dark"] {
+  --color-bg: #141210;
+  --color-surface: #1e1c18;
+  --color-surface-alt: #262320;
+  --color-text: #e8e4dd;
+  --color-text-soft: #b5aea4;
+  --color-text-muted: #847d75;
+  --color-accent: #c4a77d;
+  --color-accent-hover: #d4b98f;
+  --color-accent-light: #9e845e;
+  --color-accent-bg: #2a2520;
+  --color-border: #36322c;
+  --color-border-light: #2e2a25;
+  --color-error: #d4706e;
+  --color-success: #7ab47e;
+  --color-warm: #c4956a;
+  --color-warm-bg: #261f18;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2), 0 1px 4px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.2), 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .btn-primary {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .btn-primary:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .btn-secondary {
+  background: var(--color-surface-alt);
+}
+
+[data-theme="dark"] .centering-card {
+  border-color: #3a3228;
+}
+
+[data-theme="dark"] .question-card {
+  border-color: #3a3228;
+}
+
+[data-theme="dark"] .celebration-hero {
+  border-color: #3a3228;
+  background: linear-gradient(135deg, var(--color-warm-bg) 0%, var(--color-accent-bg) 100%);
+}
+
+[data-theme="dark"] .form-group input:focus,
+[data-theme="dark"] .form-group textarea:focus,
+[data-theme="dark"] .form-group select:focus {
+  box-shadow: 0 0 0 3px rgba(196, 167, 125, 0.15);
+}
+
+[data-theme="dark"] .reaction-picker {
+  background: var(--color-surface-alt);
+  border-color: var(--color-border);
+}
+
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -51,6 +111,7 @@ body {
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 @keyframes fadeUp {
@@ -72,6 +133,16 @@ body {
   margin-bottom: var(--space-xl);
 }
 
+.app-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.app-header-top > div:nth-child(2) {
+  flex: 1;
+}
+
 .app-header h1 {
   font-family: var(--font-display);
   font-size: 2.1rem;
@@ -88,6 +159,33 @@ body {
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+/* ==================== THEME TOGGLE ==================== */
+.theme-toggle {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all var(--duration) var(--ease);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-accent-light);
+  background: var(--color-surface-alt);
+  transform: scale(1.08);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
 }
 
 h2 {
