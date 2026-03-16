@@ -2,8 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../lib/api.js';
 import { useAuth } from '../App.jsx';
+import Onboarding from '../components/Onboarding.jsx';
 
 export default function Login() {
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem('cr_onboarded');
+  });
   const [isRegister, setIsRegister] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -12,6 +16,16 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  function handleOnboardingComplete() {
+    localStorage.setItem('cr_onboarded', 'true');
+    setShowOnboarding(false);
+    setIsRegister(true); // Default to register for new users
+  }
+
+  if (showOnboarding) {
+    return <Onboarding onComplete={handleOnboardingComplete} />;
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();

@@ -593,6 +593,98 @@ h3 {
 .celebration-highlight-title { font-weight: 700; font-size: 0.88rem; color: var(--color-text); margin-bottom: 2px; }
 .celebration-highlight-detail { font-size: 0.85rem; color: var(--color-text-soft); font-weight: 500; }
 
+/* ==================== ONBOARDING ==================== */
+@keyframes onboardingFade {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.onboarding {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.onboarding-card {
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+.onboarding-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: var(--space-xl);
+}
+
+.onboarding-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-border);
+  cursor: pointer;
+  padding: 0;
+  transition: all var(--duration) var(--ease);
+}
+
+.onboarding-dot-active {
+  background: var(--color-accent);
+  width: 24px;
+  border-radius: 4px;
+}
+
+.onboarding-content {
+  animation: onboardingFade 0.4s var(--ease) both;
+  margin-bottom: var(--space-xl);
+}
+
+.onboarding-emoji {
+  font-size: 3rem;
+  margin-bottom: var(--space-lg);
+}
+
+.onboarding-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+  line-height: 1.3;
+}
+
+.onboarding-body {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--color-text-soft);
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.onboarding-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.onboarding-skip {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color var(--duration) var(--ease);
+}
+
+.onboarding-skip:hover {
+  color: var(--color-text-soft);
+}
+
 /* ==================== UTILITIES ==================== */
 .text-center { text-align: center; }
 .text-muted { color: var(--color-text-muted); }
@@ -620,4 +712,7 @@ h3 {
   .celebration-stats { gap: var(--space-md); }
   .celebration-stat-value { font-size: 1.6rem; }
   .reaction-picker { left: 0; right: auto; }
+  .onboarding-title { font-size: 1.4rem; }
+  .onboarding-body { font-size: 0.9rem; }
+  .onboarding-emoji { font-size: 2.5rem; }
 }
