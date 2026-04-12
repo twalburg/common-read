@@ -28,6 +28,12 @@ export const auth = {
     request('/auth/register', { method: 'POST', body: JSON.stringify({ username, password, displayName }) }),
   login: (username, password) =>
     request('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
+  requestReset: (username, newPassword) =>
+    request('/auth/reset', { method: 'POST', body: JSON.stringify({ username, newPassword }) }),
+  getResetRequests: () =>
+    request('/auth/reset'),
+  approveReset: (requestId, action) =>
+    request('/auth/reset-approve', { method: 'POST', body: JSON.stringify({ requestId, action }) }),
 };
 
 export const groups = {
