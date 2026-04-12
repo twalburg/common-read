@@ -863,3 +863,158 @@ h3 {
   border-bottom: none;
   padding-bottom: 0;
 }
+
+/* ==================== REST DAYS PICKER ==================== */
+.rest-days-picker {
+  display: flex;
+  gap: 6px;
+}
+
+.rest-day-btn {
+  flex: 1;
+  padding: 8px 4px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-soft);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+  text-align: center;
+}
+
+.rest-day-btn:hover {
+  border-color: var(--color-accent-light);
+}
+
+.rest-day-btn-active {
+  background: var(--color-accent-bg);
+  border-color: var(--color-accent-light);
+  color: var(--color-accent);
+}
+
+/* ==================== REST DAY BANNER ==================== */
+.rest-day-banner {
+  text-align: center;
+  padding: var(--space-xl) var(--space-lg);
+  margin-bottom: var(--space-lg);
+  background: var(--color-warm-bg);
+  border: 1px solid #e8d5bf;
+  border-radius: var(--radius-lg);
+  animation: fadeUp 0.4s var(--ease) both;
+}
+
+.rest-day-emoji {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-md);
+}
+
+.rest-day-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+}
+
+.rest-day-body {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--color-text-soft);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* ==================== iOS DATE INPUT FIX ==================== */
+.form-group input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 44px;
+  line-height: 1.5;
+}
+
+/* ==================== SCRIPTURE CONTROLS (ensure present) ==================== */
+.scripture-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  gap: var(--space-sm);
+}
+
+.translation-select {
+  padding: 6px 28px 6px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: border-color var(--duration) var(--ease);
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23847d75' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.translation-select:focus {
+  outline: none;
+  border-color: var(--color-accent-light);
+}
+
+.translation-select:hover {
+  border-color: var(--color-accent-light);
+}
+
+.font-size-control {
+  display: flex;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.font-size-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+  font-family: var(--font-display);
+  font-weight: 600;
+  border-right: 1px solid var(--color-border);
+}
+
+.font-size-btn:last-child {
+  border-right: none;
+}
+
+.font-size-btn:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text-soft);
+}
+
+.font-size-btn-active {
+  background: var(--color-accent-bg);
+  color: var(--color-accent);
+}
+
+/* ==================== RESET REQUESTS ==================== */
+.reset-request-item {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(196, 149, 106, 0.2);
+}
+
+.reset-request-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
